@@ -125,7 +125,11 @@ EOS
 
 # ユーザーページ
 cat << EOS >app/views/pages/show.html.erb
+<% if current_user == nil %>
+<h2>こんにちは、ログインしてください</h2>
+<% else %>
 <h1>こんにちは、<%= current_user.email %>さん</h1>
+<% end %>
 <p>ユーザー用ページです。</p>
 EOS
 
