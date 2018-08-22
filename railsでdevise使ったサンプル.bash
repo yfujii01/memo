@@ -11,7 +11,8 @@ git commit -m 'rails new'
 # gem追加
 bundle add devise
 
-# ログイン機能追加
+# ログイン機能追加(devise installがが止まるときがあるのでspring stopを念の為入れる)
+bundle exec spring stop
 rails g devise:install
 
 # メール用の設定をする
@@ -20,7 +21,7 @@ rails g devise:install
 ## ${instr}を埋め込む
 cnf=./config/environments/development.rb
 findmes='config.file_watcher'
-instr=$(cat << 'EOS'
+instr=$(cat << EOS
 
   # mailer setting
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
@@ -32,7 +33,13 @@ ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1'${instr}'\n")' ${cnf}
 rails g controller Pages index show
 
 # rootページを変更
-sed -i 's@get '\''pages/index'\''@root '\''pages#index'\''@' config/routes.rb
+## ${cnf}のファイルに対して
+## ${findmes}の文言を
+## ${instr}に置換する
+cnf=./config/routes.rb
+findmes="get 'pages.index'"
+instr="root 'pages#index'"
+ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'/, "'${instr}'")' ${cnf}
 
 # ログイン関連機能を編集可能にする
 rails g devise:views
@@ -77,10 +84,16 @@ end
 EOS
 
 # マイグレーションファイルの編集
+## ${cnf}のファイルに対して
+## ${findmes}の文言を
+## ${instr}に置換する
 cnf=$(find . -name "*devise_create_users.rb")
-sed -i 's/      # t/      t/g' ${cnf}
-sed -i 's/    # add_index /    add_index /g' ${cnf}
-cnf=''
+findmes="      # t"
+instr="      t"
+ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'/, "'${instr}'")' ${cnf}
+findmes="    # add_index "
+instr="    add_index "
+ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'/, "'${instr}'")' ${cnf}
 
 # DB反映
 rails db:migrate
@@ -106,8 +119,7 @@ cat << 'EOS' | sed -i ${ln}'r /dev/stdin' ${cnf}
     <p class="notice"><%= notice %></p>
     <p class="alert"><%= alert %></p>
 EOS
-cnf=''
-findmes=''
+
 
 # スマホ対応
 cnf=app/views/layouts/application.html.erb
