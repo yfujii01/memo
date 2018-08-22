@@ -1,8 +1,12 @@
 # devise gemを使用したログイン機能を作成するサンプル
 
-rails new アプリ名
+APP_NAME=HOGEHOGE
 
-cd アプリ名
+# アプリ作成
+rails new ${APP_NAME}
+cd ${APP_NAME}
+git add -A
+git commit -m 'rails new'
 
 # gem追加
 bundle add devise
@@ -10,21 +14,25 @@ bundle add devise
 # ログイン機能追加
 rails g devise:install
 
-# 最後から2行目にメール用の設定をする
+# メール用の設定をする
 cnf=config/environments/development.rb
-ln=`grep -n config.file_watcher ${cnf}  | sed -e 's/:.*//g' | head -1`
+findmes=config.file_watcher
+ln=`grep -n ${findmes} ${cnf}  | sed -e 's/:.*//g' | head -1`
 cat << 'EOS' | sed -i ${ln}'r /dev/stdin' ${cnf}
 
   # mailer setting
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 EOS
 cnf=''
+findmes=''
 
+# トップページおよびユーザーページ作成
 rails g controller Pages index show
 
 # rootページを変更
 sed -i 's@get '\''pages/index'\''@root '\''pages#index'\''@' config/routes.rb
 
+# ログイン関連機能を編集可能にする
 rails g devise:views
 
 # app/views/devise/shared/_links.html.erb (リンク用パーシャル)
@@ -40,6 +48,7 @@ rails g devise:views
 # app/views/devise/mailer/reset_password_instructions.html.erb (メール用パスワードリセット文)
 # app/views/devise/mailer/unlock_instructions.html.erb (メール用ロック解除文)
 
+# ユーザー管理テーブル作成
 rails g devise User
 
 # 初期設定	機能	概要
@@ -73,3 +82,52 @@ cnf=''
 
 # DB反映
 rails db:migrate
+
+# ログイン情報を表示するheaderを作る
+cnf=app/views/layouts/application.html.erb
+findmes='<body>'
+ln=`grep -n ${findmes} ${cnf}  | sed -e 's/:.*//g' | head -1`
+cat << 'EOS' | sed -i ${ln}'r /dev/stdin' ${cnf}
+    <header>
+      <nav>
+        <% if user_signed_in? %>
+        <strong><%= link_to current_user.email, pages_show_path %></strong>
+        <%= link_to 'プロフィール変更', edit_user_registration_path %>
+        <%= link_to 'ログアウト', destroy_user_session_path, method: :delete %>
+      <% else %>
+        <%= link_to 'サインアップ', new_user_registration_path %>
+        <%= link_to 'ログイン', new_user_session_path %>
+        <% end %>
+      </nav>
+    </header>
+
+    <p class="notice"><%= notice %></p>
+    <p class="alert"><%= alert %></p>
+EOS
+cnf=''
+findmes=''
+
+# スマホ対応
+cnf=app/views/layouts/application.html.erb
+findmes='csp_meta_tag'
+ln=`grep -n ${findmes} ${cnf}  | sed -e 's/:.*//g' | head -1`
+cat << 'EOS' | sed -i ${ln}'r /dev/stdin' ${cnf}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+EOS
+cnf=''
+findmes=''
+
+# トップページ
+cat << EOS >app/views/pages/index.html.erb
+<h1>ようこそ</h1>
+<p>トップページです。</p>
+EOS
+
+# ユーザーページ
+cat << EOS >app/views/pages/show.html.erb
+<h1>こんにちは、<%= current_user.email %>さん</h1>
+<p>ユーザー用ページです。</p>
+EOS
+
+git add -A
+git commit -m '雛型完成'
