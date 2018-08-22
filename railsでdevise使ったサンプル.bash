@@ -15,16 +15,18 @@ bundle add devise
 rails g devise:install
 
 # メール用の設定をする
-cnf=config/environments/development.rb
-findmes=config.file_watcher
-ln=`grep -n ${findmes} ${cnf}  | sed -e 's/:.*//g' | head -1`
-cat << 'EOS' | sed -i ${ln}'r /dev/stdin' ${cnf}
+## ${cnf}のファイルに対して
+## ${findmes}の文言の次の行に
+## ${instr}を埋め込む
+cnf=./config/environments/development.rb
+findmes='config.file_watcher'
+instr=$(cat << 'EOS'
 
   # mailer setting
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 EOS
-cnf=''
-findmes=''
+)
+ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1'${instr}'\n")' ${cnf}
 
 # トップページおよびユーザーページ作成
 rails g controller Pages index show
