@@ -3,6 +3,7 @@
 APP_NAME=HOGEHOGE
 
 # アプリ作成
+[ -e ${APP_NAME} ] && rm -rf ${APP_NAME}
 rails new ${APP_NAME}
 cd ${APP_NAME}
 git add -A
@@ -21,25 +22,25 @@ rails g devise:install
 ## ${instr}を埋め込む
 cnf=./config/environments/development.rb
 findmes='config.file_watcher'
-instr=$(cat << EOS
+cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.read}")' ${cnf}
 
   # mailer setting
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 EOS
-)
-ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1'${instr}'\n")' ${cnf}
+
 
 # トップページおよびユーザーページ作成
 rails g controller Pages index show
 
 # rootページを変更
-## ${cnf}のファイルに対して
-## ${findmes}の文言を
-## ${instr}に置換する
 cnf=./config/routes.rb
-findmes="get 'pages.index'"
-instr="root 'pages#index'"
-ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'/, "'${instr}'")' ${cnf}
+findmes="get.+pages\/index"
+# 行挿入
+cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.read}")' ${cnf}
+	root 'pages#index'
+EOS
+# 対象行削除
+ruby -i -e 'puts ARGF.read.gsub(/(.+'${findmes}'.+)\n/, "")' ${cnf}
 
 # ログイン関連機能を編集可能にする
 rails g devise:views
@@ -88,11 +89,12 @@ EOS
 ## ${findmes}の文言を
 ## ${instr}に置換する
 cnf=$(find . -name "*devise_create_users.rb")
-findmes="      # t"
-instr="      t"
+findmes="#.t\."
+instr="t."
 ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'/, "'${instr}'")' ${cnf}
-findmes="    # add_index "
-instr="    add_index "
+
+findmes="#.add_index"
+instr="add_index"
 ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'/, "'${instr}'")' ${cnf}
 
 # DB反映
@@ -101,8 +103,8 @@ rails db:migrate
 # ログイン情報を表示するheaderを作る
 cnf=app/views/layouts/application.html.erb
 findmes='<body>'
-ln=`grep -n ${findmes} ${cnf}  | sed -e 's/:.*//g' | head -1`
-cat << 'EOS' | sed -i ${ln}'r /dev/stdin' ${cnf}
+## ヒアドキュメントでないとタグを正常に取り込めない
+cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.read}")' ${cnf}
     <header>
       <nav>
         <% if user_signed_in? %>
@@ -120,16 +122,12 @@ cat << 'EOS' | sed -i ${ln}'r /dev/stdin' ${cnf}
     <p class="alert"><%= alert %></p>
 EOS
 
-
 # スマホ対応
 cnf=app/views/layouts/application.html.erb
 findmes='csp_meta_tag'
-ln=`grep -n ${findmes} ${cnf}  | sed -e 's/:.*//g' | head -1`
-cat << 'EOS' | sed -i ${ln}'r /dev/stdin' ${cnf}
+cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.read}")' ${cnf}
     <meta name="viewport" content="width=device-width, initial-scale=1">
 EOS
-cnf=''
-findmes=''
 
 # トップページ
 cat << EOS >app/views/pages/index.html.erb
@@ -149,3 +147,6 @@ EOS
 
 git add -A
 git commit -m '雛型完成'
+
+# rails起動
+rails s
