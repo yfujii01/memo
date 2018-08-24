@@ -12,7 +12,7 @@ git commit -m 'rails new'
 # gem追加
 bundle add devise
 
-# ログイン機能追加(devise installがが止まるときがあるのでspring stopを念の為入れる)
+# ログイン機能追加(devise installが止まるときがあるのでspring stopを念の為入れる)
 bundle exec spring stop
 rails g devise:install
 
@@ -147,6 +147,3 @@ EOS
 
 git add -A
 git commit -m '雛型完成'
-
-# rails起動
-rails s
