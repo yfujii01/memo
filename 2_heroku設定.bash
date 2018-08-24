@@ -25,7 +25,7 @@ findmes='config.active_record.dump_schema_after_migration'
 cat<<EOS | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.read}")' ${cnf}
 
   # mailer setting
-  config.action_mailer.default_url_options = { :host => '${HEROKU_APP_NAME}', :protocol => 'https' }
+  config.action_mailer.default_url_options = { :host => '${HEROKU_APP_NAME}.herokuapp.com', :protocol => 'https' }
 EOS
 
 # DB設定
@@ -36,6 +36,7 @@ gem 'sqlite3', group: :development
 # 本番ではpostgressを使用する
 gem 'pg', group: :production
 EOS
+bundle install --without production
 
 # heroku設定(同名のアプリは上書き)
 heroku destroy ${HEROKU_APP_NAME} --confirm ${HEROKU_APP_NAME}
