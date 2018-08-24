@@ -11,6 +11,7 @@ git commit -m 'rails new'
 
 # gem追加
 bundle add devise
+bundle add devise-i18n
 
 # ログイン機能追加(devise installが止まるときがあるのでspring stopを念の為入れる)
 bundle exec spring stop
@@ -28,6 +29,13 @@ cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.r
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 EOS
 
+# locale日本語設定
+cnf=./config/application.rb
+findmes='config.load_defaults'
+cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.read}")' ${cnf}
+
+    config.i18n.default_locale = :ja
+EOS
 
 # トップページおよびユーザーページ作成
 rails g controller Pages index show
@@ -42,8 +50,11 @@ EOS
 # 対象行削除
 ruby -i -e 'puts ARGF.read.gsub(/(.+'${findmes}'.+)\n/, "")' ${cnf}
 
-# ログイン関連機能を編集可能にする
-rails g devise:views
+# ログイン関連機能を編集可能にする(日本語)
+rails g devise:i18n:views
+
+# ログイン関連機能を編集可能にする(英語)
+# rails g devise:views
 
 # app/views/devise/shared/_links.html.erb (リンク用パーシャル)
 # app/views/devise/confirmations/new.html.erb (認証メールの再送信画面)
@@ -147,3 +158,8 @@ EOS
 
 git add -A
 git commit -m '雛型完成'
+
+
+open http://localhost:3000
+
+rails s
