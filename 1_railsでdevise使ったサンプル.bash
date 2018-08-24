@@ -1,6 +1,12 @@
 # devise gemを使用したログイン機能を作成するサンプル
 
-APP_NAME=HOGEHOGE
+# 第1引数にアプリ名
+APP_NAME=${1}
+
+if [ -z ${1} ]; then
+  echo '引数にアプリ名を渡してください'
+  exit
+fi
 
 # アプリ作成
 [ -e ${APP_NAME} ] && rm -rf ${APP_NAME}
@@ -12,6 +18,11 @@ git commit -m 'rails new'
 # gem追加
 bundle add devise
 bundle add devise-i18n
+
+# メールをブラウザで確認できるgem
+## メールに日本語が混ざるとContent-Transfer-Encoding: base64
+## となり、ログでの解読が困難
+bundle add letter_opener --group development
 
 # ログイン機能追加(devise installが止まるときがあるのでspring stopを念の為入れる)
 bundle exec spring stop
@@ -27,6 +38,10 @@ cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.r
 
   # mailer setting
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+
+  # mail check on browser by letter_opener gem
+  config.action_mailer.delivery_method = :letter_opener
+
 EOS
 
 # locale日本語設定
@@ -158,8 +173,3 @@ EOS
 
 git add -A
 git commit -m '雛型完成'
-
-
-open http://localhost:3000
-
-rails s

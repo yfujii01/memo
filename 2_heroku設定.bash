@@ -1,5 +1,12 @@
-APP_NAME=HOGEHOGE
-HEROKU_APP_NAME=f01hogehoge
+# 第1引数にアプリ名
+APP_NAME=${1}
+# 第2引数にherokuアプリ名
+HEROKU_APP_NAME=${2}
+
+if [ -z ${2} ]; then
+  echo '引数にアプリ名とherokuのアプリ名を渡してください'
+  exit
+fi
 
 cd ${APP_NAME}
 
@@ -52,6 +59,3 @@ git push heroku master
 
 # DB migrate
 heroku run rails db:migrate
-
-# open
-heroku open
