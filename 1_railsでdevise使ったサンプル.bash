@@ -123,8 +123,54 @@ findmes="#.add_index"
 instr="add_index"
 ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'/, "'${instr}'")' ${cnf}
 
+
+# ユーザー情報にユーザー名を追加
+rails g migration add_columns_to_users username
+
 # DB反映
 rails db:migrate
+
+# サインアップページにユーザー名の項目を追加する
+cnf=./app/views/devise/registrations/new.html.erb
+findmes=',.autofocus:.true'
+ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'/, "")' ${cnf}
+findmes='devise_error_messages'
+cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.read}")' ${cnf}
+
+  <div class="field">
+    <%= f.label :ユーザー名 %><br />
+    <%= f.text_field :username, autofocus: true %>
+  </div>
+EOS
+
+# プロフィール編集ページにユーザー名の項目を追加する
+cnf=./app/views/devise/registrations/edit.html.erb
+findmes=',.autofocus:.true'
+ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'/, "")' ${cnf}
+findmes='devise_error_messages'
+cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.read}")' ${cnf}
+
+  <div class="field">
+    <%= f.label :ユーザー名 %><br />
+    <%= f.text_field :username, autofocus: true %>
+  </div>
+EOS
+
+
+# DBへの登録項目にユーザー名の項目を追加する
+cnf=./app/controllers/application_controller.rb
+findmes='class.ApplicationController.<.ActionController::Base'
+cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.read}")' ${cnf}
+  protect_from_forgery with: :exception
+  before_action :configure_permitted_parameters, if: :devise_controller?
+
+  protected
+
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:username])
+    devise_parameter_sanitizer.permit(:account_update, keys: [:username])
+  end
+EOS
 
 # ログイン情報を表示するheaderを作る
 cnf=app/views/layouts/application.html.erb
@@ -134,7 +180,7 @@ cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.r
     <header>
       <nav>
         <% if user_signed_in? %>
-        <strong><%= link_to current_user.email, pages_show_path %></strong>
+        <strong><%= link_to current_user.username, pages_show_path %></strong>
         <%= link_to 'プロフィール変更', edit_user_registration_path %>
         <%= link_to 'ログアウト', destroy_user_session_path, method: :delete %>
       <% else %>
@@ -166,7 +212,7 @@ cat << EOS >app/views/pages/show.html.erb
 <% if current_user == nil %>
 <h2>こんにちは、ログインしてください</h2>
 <% else %>
-<h1>こんにちは、<%= current_user.email %>さん</h1>
+<h1>こんにちは、<%= current_user.username %>さん</h1>
 <% end %>
 <p>ユーザー用ページです。</p>
 EOS
