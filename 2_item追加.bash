@@ -62,3 +62,7 @@ EOS
 
 # db migrate
 rails db:migrate
+
+# git commit
+git add -A
+git commit -m 'add posts'

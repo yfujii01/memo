@@ -2,31 +2,18 @@ APP_NAME = hoge
 HEROKU_APP_NAME = f01hoge
 
 all:
-	@make 1_build
-	@make 2_build
-	@make 3_build
+	@make 1
+	@make 2
+	@make 3
 
 1:
-	@make 1_build
-	@make open_local
-
-1_build:
 	bash 1_railsでdevise使ったサンプル.bash ${APP_NAME}
 
 2:
-	@make 2_build
-	@make open_heroku
-
-2_build:
-	bash 2_heroku設定.bash ${APP_NAME} ${HEROKU_APP_NAME}
+	bash 2_item追加.bash ${APP_NAME} ${HEROKU_APP_NAME}
 
 3:
-	@make 3_build
-	@make open_local
-
-3_build:
-	@make reset
-	bash 3_item追加.bash ${APP_NAME}
+	bash 3_heroku設定.bash ${APP_NAME}
 
 open_local:
 	@make close_local
