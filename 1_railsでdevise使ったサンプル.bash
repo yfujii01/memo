@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # devise gemを使用したログイン機能を作成するサンプル
 
 # 第1引数にアプリ名
@@ -100,7 +101,7 @@ rails g devise User
 # x	omniauthable	intridea/omniauthをサポートします。TwitterやFacebookなどの認証を追加したい場合はこれを使用します。
 
 # Userモデルの編集
-cat <<EOS > app/models/user.rb
+cat <<EOS > ./app/models/user.rb
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
@@ -173,7 +174,7 @@ cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.r
 EOS
 
 # ログイン情報を表示するheaderを作る
-cnf=app/views/layouts/application.html.erb
+cnf=./app/views/layouts/application.html.erb
 findmes='<body>'
 ## ヒアドキュメントでないとタグを正常に取り込めない
 cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.read}")' ${cnf}
@@ -195,20 +196,20 @@ cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.r
 EOS
 
 # スマホ対応
-cnf=app/views/layouts/application.html.erb
+cnf=./app/views/layouts/application.html.erb
 findmes='csp_meta_tag'
 cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.read}")' ${cnf}
     <meta name="viewport" content="width=device-width, initial-scale=1">
 EOS
 
 # トップページ
-cat << EOS >app/views/pages/index.html.erb
+cat << EOS >./app/views/pages/index.html.erb
 <h1>ようこそ</h1>
 <p>トップページです。</p>
 EOS
 
 # ユーザーページ
-cat << EOS >app/views/pages/show.html.erb
+cat << EOS >./app/views/pages/show.html.erb
 <% if current_user == nil %>
 <h2>こんにちは、ログインしてください</h2>
 <% else %>
@@ -216,6 +217,18 @@ cat << EOS >app/views/pages/show.html.erb
 <% end %>
 <p>ユーザー用ページです。</p>
 EOS
+
+# seed
+cat << EOS >./db/seeds.rb
+user = User.new(:username => 'aba',
+                :email => 'a@a.a',
+                :password => 'password'
+)
+user.skip_confirmation!
+user.save
+EOS
+
+
 
 git add -A
 git commit -m '雛型完成'

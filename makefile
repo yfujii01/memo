@@ -29,12 +29,15 @@ all:
 
 open_local:
 	@make close_local
+	cd ${APP_NAME} && rails db:migrate:reset
+	cd ${APP_NAME} && rails db:seed
 	cd ${APP_NAME} && rails s -d
 	open http://localhost:3000
 
 close_local:
 	ps aux > ps.log
 	cat ps.log | grep localhost:3000 | awk '{print $$2}' | xargs kill -9
+	rm ps.log
 
 open_heroku:
 	cd ${APP_NAME} && heroku open

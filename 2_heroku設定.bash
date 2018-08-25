@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # 第1引数にアプリ名
 APP_NAME=${1}
 # 第2引数にherokuアプリ名
