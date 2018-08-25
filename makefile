@@ -10,10 +10,10 @@ all:
 	bash 1_railsでdevise使ったサンプル.bash ${APP_NAME}
 
 2:
-	bash 2_item追加.bash ${APP_NAME} ${HEROKU_APP_NAME}
+	bash 2_item追加.bash ${APP_NAME}
 
 3:
-	bash 3_heroku設定.bash ${APP_NAME}
+	bash 3_heroku設定.bash ${APP_NAME} ${HEROKU_APP_NAME}
 
 open_local:
 	@make close_local
