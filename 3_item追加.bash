@@ -34,5 +34,31 @@ cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/(\n.*'${findmes}')/, "#{STDIN.read
   <%= link_to 'ポスト', posts_path %>
 EOS
 
+# 投稿はcurrent_userが投稿したものだけを表示
+cnf=./app/controllers/posts_controller.rb
+findmes='@posts.=.Post.all'
+cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'/, "#{STDIN.read}")' ${cnf}
+    @posts = Post.where(user_id: current_user)
+EOS
+
+# 更新対象にuser_idを追加
+cnf=./app/controllers/posts_controller.rb
+findmes='params.require.:post..permit.:title,.:body.'
+cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'/, "#{STDIN.read}")' ${cnf}
+    params.require(:post).permit(:title, :body, :user_id)
+EOS
+
+# flashの設定がapplication.html.erbと被るので削除
+cnf=./app/views/posts/index.html.erb
+findmes='<p.id="notice"><%=.notice.%><.p>'
+cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'\n\n/, "#{STDIN.read}")' ${cnf}
+EOS
+
+# flashの設定がapplication.html.erbと被るので削除
+cnf=./app/views/posts/show.html.erb
+findmes='<p.id="notice"><%=.notice.%><.p>'
+cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/'${findmes}'\n\n/, "#{STDIN.read}")' ${cnf}
+EOS
+
 # db migrate
 rails db:migrate

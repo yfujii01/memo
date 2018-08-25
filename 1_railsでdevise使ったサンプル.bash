@@ -191,8 +191,8 @@ cat<<'EOS' | ruby -i -e 'puts ARGF.read.gsub(/('${findmes}'.*\n)/, "\\1#{STDIN.r
       </nav>
     </header>
 
-    <p class="notice"><%= notice %></p>
-    <p class="alert"><%= alert %></p>
+    <p id="notice"><%= notice %></p>
+    <p id="alert"><%= alert %></p>
 EOS
 
 # スマホ対応
@@ -219,9 +219,23 @@ cat << EOS >./app/views/pages/show.html.erb
 EOS
 
 # seed
-cat << EOS >./db/seeds.rb
-user = User.new(:username => 'aba',
+cat << EOS >>./db/seeds.rb
+user = User.new(:username => 'aaa',
                 :email => 'a@a.a',
+                :password => 'password'
+)
+user.skip_confirmation!
+user.save
+
+user = User.new(:username => 'bbb',
+                :email => 'b@b.b',
+                :password => 'password'
+)
+user.skip_confirmation!
+user.save
+
+user = User.new(:username => 'ccc',
+                :email => 'c@c.c',
                 :password => 'password'
 )
 user.skip_confirmation!

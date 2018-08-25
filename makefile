@@ -3,7 +3,8 @@ HEROKU_APP_NAME = f01hoge
 
 all:
 	@make 1_build
-	@make 2
+	@make 2_build
+	@make 3_build
 
 1:
 	@make 1_build
@@ -44,6 +45,6 @@ open_heroku:
 
 reset:
 	cd ${APP_NAME} && git checkout .
-	cd ${APP_NAME} && git status -s | grep ^"??" | awk {'print $2'} | xargs rm -rf
+	cd ${APP_NAME} && git status -s | grep ^"??" | awk {'print $$2'} | xargs rm -rf
 	cd ${APP_NAME} && rails db:migrate:reset
 
